@@ -31,6 +31,22 @@ ln -s "$PWD/oh-my-llm-wiki" ~/.agents/skills/llm-wiki-maintainer
 
 The repository root is the skill directory and contains `SKILL.md`.
 
+### One-paste agent install
+
+Paste one prompt into your agent.
+
+**Codex**
+
+```text
+Install or update https://github.com/STOKES-DOT/oh-my-llm-wiki as my personal Codex skill at ~/.agents/skills/llm-wiki-maintainer. Clone it if missing; if it is already the same Git repo, use git pull --ff-only. If the target has local changes or unrelated files, stop and ask me. Run python3 tests/test_read_pdf.py and report the install path and test result.
+```
+
+**Claude Code**
+
+```text
+Install or update https://github.com/STOKES-DOT/oh-my-llm-wiki as my personal Claude Code skill at ~/.claude/skills/llm-wiki-maintainer. Clone it if missing; if it is already the same Git repo, use git pull --ff-only. If the target has local changes or unrelated files, stop and ask me. Run python3 tests/test_read_pdf.py and report the install path and test result.
+```
+
 ## Use
 
 Invoke the skill explicitly or discuss a paper in a workspace that uses a
