@@ -6,7 +6,7 @@ into an evidence-bounded Markdown wiki.
 The repository contains the reusable skill only. It does not publish the local
 wiki corpus or original papers.
 
-![Obsidian knowledge graph growing from source, topic, query, and relation pages](examples/knowledge-graph.gif)
+![Obsidian knowledge graph showing a selected method topic and its connected literature](examples/knowledge-graph.png)
 
 ## What it maintains
 
@@ -98,7 +98,7 @@ wiki/topics/users/<user-key>/<slug>.md  one user's interest topic
 SKILL.md
 scripts/read_pdf.py
 tests/test_read_pdf.py
-examples/knowledge-graph.gif
+examples/knowledge-graph.png
 ```
 
 Run the PDF reader tests with:
