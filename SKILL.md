@@ -351,6 +351,31 @@ PDF-reading workflow:
 The tool standardizes extraction and provenance. It does not interpret the
 paper, verify scientific claims, or replace the mandatory full-paper review.
 
+## Chemical structure verification tool
+
+When a paper discussion involves molecular structures (dyes, oligomers,
+building blocks), run the structure recognition and verification pipeline in
+`references/chem-structure-verification.md` before recording any structure in
+the wiki. The pipeline is mandatory for every literature-reading task with
+molecular structures: render scheme pages, identify connectivity, propose
+SMILES, hard-validate against the paper's own HRMS/formula data, visual
+cross-check, then record canonical SMILES with provenance.
+
+Use the bundled validator:
+
+```bash
+python3 scripts/chem_structure_verify.py --smiles "<SMILES>" \
+  --formula C18H17BF2N2 --ion "[M+Na]+" --mz 739.1426 --depict out.png
+python3 scripts/chem_structure_verify.py --batch compounds.csv --json-report report.json
+```
+
+The tool requires `rdkit`. Exit code 0 means every structure passed; never
+record a structure that did not pass the HRMS gate. A worked end-to-end
+example (RWMol assembly of a fused-oligomer family) lives in
+`scripts/examples/build_oligobodipy_example.py`. The pipeline is parallel at
+paper granularity and suitable for fan-out to subagents; see the reference
+document for the full SOP, pitfalls list, and coordination rules.
+
 ## Primary PDF citation rule
 
 Every source page backed by a PDF must include a clickable link to the
