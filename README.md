@@ -38,13 +38,13 @@ Paste one prompt into your agent.
 **Codex**
 
 ```text
-Install or update https://github.com/STOKES-DOT/oh-my-llm-wiki as my personal Codex skill at ~/.agents/skills/llm-wiki-maintainer. Clone it if missing; if it is already the same Git repo, use git pull --ff-only. If the target has local changes or unrelated files, stop and ask me. Run python3 tests/test_read_pdf.py and report the install path and test result.
+Install or update https://github.com/STOKES-DOT/oh-my-llm-wiki as my personal Codex skill at ~/.agents/skills/llm-wiki-maintainer. Clone it if missing; if it is the same repo, use git pull --ff-only; stop on local changes or conflicts. With the available Python command, run scripts/check_dependencies.py and all tests in tests/. If the doctor says ready=false, report "skill installed; PDF runtime blocked", list missing tools, and ask before installing Poppler. Report ready only when the doctor and tests pass.
 ```
 
 **Claude Code**
 
 ```text
-Install or update https://github.com/STOKES-DOT/oh-my-llm-wiki as my personal Claude Code skill at ~/.claude/skills/llm-wiki-maintainer. Clone it if missing; if it is already the same Git repo, use git pull --ff-only. If the target has local changes or unrelated files, stop and ask me. Run python3 tests/test_read_pdf.py and report the install path and test result.
+Install or update https://github.com/STOKES-DOT/oh-my-llm-wiki as my personal Claude Code skill at ~/.claude/skills/llm-wiki-maintainer. Clone it if missing; if it is the same repo, use git pull --ff-only; stop on local changes or conflicts. With the available Python command, run scripts/check_dependencies.py and all tests in tests/. If the doctor says ready=false, report "skill installed; PDF runtime blocked", list missing tools, and ask before installing Poppler. Report ready only when the doctor and tests pass.
 ```
 
 ## Use
@@ -79,6 +79,14 @@ The skill routes durable knowledge into:
 The bundled reader uses Poppler to produce deterministic evidence artifacts:
 
 ```bash
+python3 scripts/check_dependencies.py
+```
+
+The doctor must report `"ready": true` before the PDF runtime is considered
+available. Unit tests use cross-platform fake Poppler commands and therefore do
+not verify the machine's real `PATH`.
+
+```bash
 python3 scripts/read_pdf.py paper.pdf \
   --output-dir /private/tmp/paper-read \
   --render 1,4-5
@@ -94,6 +102,13 @@ Outputs:
 
 The section index is a navigation hint, not scientific evidence. A paper is
 only promoted after the relevant source sections and visual pages are reviewed.
+
+Poppler setup:
+
+- macOS: `brew install poppler`
+- Debian/Ubuntu: `sudo apt-get install poppler-utils`
+- Windows: install a maintained Poppler build and add the directory containing
+  `pdfinfo.exe`, `pdftotext.exe`, and `pdftoppm.exe` to `PATH`.
 
 ## Shared evidence, personalized attention
 
@@ -112,7 +127,10 @@ wiki/topics/users/<user-key>/<slug>.md  one user's interest topic
 
 ```text
 SKILL.md
+scripts/check_dependencies.py
 scripts/read_pdf.py
+tests/fake_poppler.py
+tests/test_check_dependencies.py
 tests/test_read_pdf.py
 examples/knowledge-graph.png
 ```
@@ -120,7 +138,7 @@ examples/knowledge-graph.png
 Run the PDF reader tests with:
 
 ```bash
-python3 tests/test_read_pdf.py
+python3 -m unittest discover -s tests -p "test_*.py"
 ```
 
 ## Privacy and copyright boundary
