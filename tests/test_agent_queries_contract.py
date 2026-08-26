@@ -81,6 +81,8 @@ class AgentQueriesContractTest(unittest.TestCase):
             "No Agent Queries question, answer, score, feedback, or inferred relation",
             "relative to the host workspace root",
             "create no role attempt records",
+            "is a content critical failure, not an invocation failure",
+            "must not trigger an invocation retry",
         ):
             self.assertIn(fragment, normalized)
 
@@ -180,6 +182,7 @@ class AgentQueriesContractTest(unittest.TestCase):
             "Knowledge-base-augmented answer",
             "Use `reviewed` only when every question passes every Round 3 gate",
             "Use `review_pending` only after all three rounds complete",
+            "including a scoreable critical citation failure",
             "Use `pipeline_blocked` when prerequisites are unmet",
             ".wiki/wiki/queries/<paper-title>-agent-queries.md",
             "No generated question, answer, score, feedback, or",

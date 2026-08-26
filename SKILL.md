@@ -136,8 +136,9 @@ answer must retain separate `Paper-grounded answer` and
 full evaluator response; never replace history with a diff or add Round 4.
 Use `reviewed` only when every question passes every Round 3 gate. Use
 `review_pending` only after all three rounds complete but at least one final
-gate fails. Use `pipeline_blocked` when prerequisites are unmet or an
-execution/validation retry is exhausted; continue the source ingest without
+gate fails, including a scoreable critical citation failure. Use
+`pipeline_blocked` when prerequisites are unmet or an execution/unscoreable
+schema-validation retry is exhausted; continue the source ingest without
 fabricating query history.
 
 Follow [the executable protocol](references/agent-queries-pipeline.md) and

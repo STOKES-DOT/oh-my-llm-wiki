@@ -169,6 +169,7 @@ references/agent-queries-pipeline.md
 templates/agent-queries.md
 scripts/read_pdf.py
 tests/test_agent_queries_contract.py
+tests/agent_queries_scenarios.md
 tests/test_read_pdf.py
 examples/knowledge-graph.png
 ```

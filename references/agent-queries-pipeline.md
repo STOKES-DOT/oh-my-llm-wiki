@@ -289,7 +289,15 @@ evidence, create no role attempt records, and render any required attempt
 fields as `not_applicable`. Require two attempt records only when a role or
 validation invocation was actually retried.
 
-Malformed scores, fewer than 3 or more than 5 questions, mutated question text
-between rounds, missing full answers/feedback, out-of-range citations, or a
-fourth round are validation failures. Preserve the invalid artifact, apply the
+An execution failure or structurally unscoreable output is an invocation
+failure. Examples are malformed or missing score fields, fewer than 3 or more
+than 5 questions, mutated question text between rounds, missing full
+answers/feedback, or a fourth round. Preserve the invalid artifact, apply the
 same one-retry rule to the responsible role, and fail closed if it recurs.
+
+A fabricated, nonexistent, out-of-range, missing, or unresolvable citation in
+an otherwise scoreable answer is a content critical failure, not an invocation
+failure. It MUST receive complete Evaluator scores and feedback and must not
+trigger an invocation retry that bypasses the three scheduled rounds. Carry
+the feedback into the next scheduled full rewrite. If it remains after Round
+3, set `answer_status: review_pending`; do not create Round 4.
