@@ -16,6 +16,8 @@ wiki corpus or original papers.
 - General method-family topics, method-improvement tables, and cross-paper
   relations.
 - Human-focus queries that preserve what the user actually asked.
+- Agent Queries with 3-5 paper-specific questions, an initial scored answer
+  round, two scored rewrite rounds, and complete answer/feedback history.
 - User-aware topic lifecycles without mixing one person's interests into
   another person's topic graph.
 - Explicit `VERIFIED`, `EXTRACTED`, `INFERRED`, `AMBIGUOUS`, and `STALE`
@@ -74,6 +76,57 @@ The skill routes durable knowledge into:
 └── output/    derived local artifacts
 ```
 
+## Agent Queries
+
+Every new-paper ingest runs a paper-understanding and maintained-wiki
+extrapolation audit. The Main Agent is the sole writer; Organizer, Questioner,
+and Evaluator are read-only roles. The Questioner creates 3-5 frozen questions,
+and the Organizer answers each question in separate paper-grounded and
+knowledge-base-augmented lanes. Non-blocked runs execute exactly three
+complete answer-score rounds; blocked runs preserve all attempt and failure
+records, plus only the question, answer, feedback, and score artifacts that
+actually completed. Every available evaluator score and feedback record is
+retained.
+
+A query becomes `reviewed` only when every question passes the final 100-point
+gates. A completed three-round run with a failed gate is `review_pending`; an
+unmet prerequisite or exhausted retry is `pipeline_blocked` while source
+ingest continues.
+
+```text
+PDF reader + existing wiki
+        |
+        v
+Evidence Pack
+        |
+        +--> Organizer: source draft
+        |
+        +--> Questioner: 3-5 questions
+                         |
+                         v
+Round 1: Organizer answers
+         -> Evaluator scores/feedback
+Round 2: Organizer revises
+         -> Evaluator scores/feedback
+Round 3: Organizer revises
+         -> Evaluator final score
+                         |
+                         v
+Main Agent validates and writes:
+source page + agent-queries page + relations/topic/index/log
+```
+
+The durable page is written to
+`.wiki/wiki/queries/<paper-title>-agent-queries.md`; complete machine history
+is retained under
+`.wiki/output/agent-query-runs/<paper-sha256>/<run-date>/`. Here `<run-date>`
+is the unique run identifier defined by the pipeline contract, not a
+display-only date. See
+[`references/agent-queries-pipeline.md`](references/agent-queries-pipeline.md)
+for the executable role, scoring, retry, and storage contract, and
+[`templates/agent-queries.md`](templates/agent-queries.md) for the durable page
+format.
+
 ## Generic PDF reader
 
 The bundled reader uses Poppler to produce deterministic evidence artifacts:
@@ -127,15 +180,19 @@ wiki/topics/users/<user-key>/<slug>.md  one user's interest topic
 
 ```text
 SKILL.md
+references/agent-queries-pipeline.md
+templates/agent-queries.md
+tests/agent_queries_scenarios.md
 scripts/check_dependencies.py
 scripts/read_pdf.py
 tests/fake_poppler.py
+tests/test_agent_queries_contract.py
 tests/test_check_dependencies.py
 tests/test_read_pdf.py
 examples/knowledge-graph.png
 ```
 
-Run the PDF reader tests with:
+Run the tests with:
 
 ```bash
 python3 -m unittest discover -s tests -p "test_*.py"

@@ -42,6 +42,7 @@ turning every conversational remark into a wiki fact.
 | Reusable definition or method distinction | `wiki/concepts/<topic>.md` |
 | Cross-paper comparison or project positioning | `wiki/topics/<topic>.md` |
 | Durable answer to a named research question | `wiki/queries/<slug>.md` |
+| Agent-generated paper-understanding audit for a new paper | `.wiki/wiki/queries/<paper-title>-agent-queries.md` plus `.wiki/output/agent-query-runs/` |
 | User-specific research interest or evolving topic | `wiki/topics/users/<user-key>/<topic>.md` |
 | New durable maintenance rule | root `AGENTS.md` only |
 
@@ -111,6 +112,44 @@ Storage rules:
 - A user's question is not evidence for the paper's method, result, limitation,
   or relation. Preserve the question as context, then answer it from the raw
   source. If direct reading is pending, keep the focus answer pending too.
+
+## Agent Queries module
+
+Run Agent Queries for every new-paper ingest after the original PDF has been
+read in full and an Evidence Pack has been frozen. This module is mandatory
+even when the user asks for a fast or bulk import. It evaluates paper
+understanding and maintained-wiki retrieval; it does not replace the
+full-paper review gate.
+
+The Main Agent is the sole orchestrator and sole wiki writer. It delegates to
+three read-only roles:
+
+- **Organizer** drafts the source synthesis and writes complete answers.
+- **Questioner** creates 3-5 frozen, paper-specific questions.
+- **Evaluator** verifies citations, assigns the 100-point rubric, and returns
+  complete scores and feedback for every question.
+
+Execute exactly three answer-score rounds. Round 1 is the initial answer;
+Rounds 2 and 3 are complete standalone rewrites based on prior feedback. Each
+answer must retain separate `Paper-grounded answer` and
+`Knowledge-base-augmented answer` lanes. Preserve every full answer and every
+full evaluator response; never replace history with a diff or add Round 4.
+Use `reviewed` only when every question passes every Round 3 gate. Use
+`review_pending` only after all three rounds complete but at least one final
+gate fails, including a scoreable critical citation failure. Use
+`pipeline_blocked` when prerequisites are unmet or an execution/unscoreable
+schema-validation retry is exhausted; continue the source ingest without
+fabricating query history.
+
+Follow [the executable protocol](references/agent-queries-pipeline.md) and
+instantiate [the durable page template](templates/agent-queries.md). Store the
+human-readable page at `.wiki/wiki/queries/<paper-title>-agent-queries.md` and the
+complete run history under
+`.wiki/output/agent-query-runs/<paper-sha256>/<run-date>/`. Mark all generated
+artifacts `AGENT-GENERATED`. No generated question, answer, score, feedback, or
+inferred relation may create an interest signal or change
+`.wiki/wiki/topics/users/**`; existing confirmed topics receive only ordinary
+source-grounded ingest updates under the user-topic rules.
 
 ## User-aware topic lifecycle
 
