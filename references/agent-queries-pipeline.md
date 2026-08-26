@@ -219,6 +219,9 @@ For `reviewed`, page confidence is the arithmetic mean of final per-question
 totals divided by 100. For both `review_pending` and `pipeline_blocked`, set
 frontmatter confidence to numeric `0.0`; keep the actual final average as a
 separate diagnostic when Round 3 completed.
+Map state to page lifecycle exactly: `reviewed` uses `lifecycle: reviewed`,
+`review_pending` uses `lifecycle: draft`, and `pipeline_blocked` uses
+`lifecycle: quarantined`.
 
 ## Storage and write isolation
 
@@ -268,6 +271,9 @@ Render frontmatter through a YAML serializer, not raw string substitution.
 Escape Markdown labels and link destinations when inserting paper titles or
 paths. Reject output that does not parse as YAML or whose links do not resolve
 to the registered artifacts.
+Before every durable write, remove every inapplicable optional section and
+reject any unresolved `{{...}}` placeholder. In particular, a `reviewed` or
+`review_pending` page MUST omit the entire `## Pipeline block record` section.
 
 ## Failure handling
 

@@ -96,12 +96,28 @@ class AgentQueriesContractTest(unittest.TestCase):
             frontmatter,
             r'(?m)^answer_status: "\{\{final_answer_status\}\}"$',
         )
+        self.assertRegex(
+            frontmatter,
+            r'(?m)^lifecycle: "\{\{final_lifecycle\}\}"$',
+        )
         self.assertIn(
             'run_path: ".wiki/output/agent-query-runs/{{paper_sha256}}/{{run_id}}/"',
             frontmatter,
         )
         self.assertNotRegex(frontmatter, r"(?m)^run_path: .*\{\{run_date\}\}")
-        self.assertIn("frontmatter with the Final verdict values", text)
+        normalized_template = re.sub(r"\s+", " ", text)
+        self.assertIn(
+            "frontmatter with the Final verdict values",
+            normalized_template,
+        )
+        for mapping in (
+            "`reviewed` -> `lifecycle: reviewed`",
+            "`review_pending` -> `lifecycle: draft`",
+            "`pipeline_blocked` -> `lifecycle: quarantined`",
+            "remove this entire",
+            "`## Pipeline block record` section",
+        ):
+            self.assertIn(mapping, text)
 
         for round_name in ("Round 1", "Round 2", "Round 3"):
             round_number = round_name[-1]

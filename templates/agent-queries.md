@@ -5,7 +5,7 @@ sources:
   - "[[{{source_page}}]]"
 last_updated: "{{YYYY-MM-DD}}"
 confidence: {{final_confidence}}
-lifecycle: draft
+lifecycle: "{{final_lifecycle}}"
 answer_status: "{{final_answer_status}}"
 origin: AGENT-GENERATED
 source_path: "{{relative_path_to_original_pdf}}"
@@ -39,8 +39,15 @@ Allowed state schema:
 
 answer_status: reviewed | review_pending | pipeline_blocked
 
-Before writing the durable page, replace `final_answer_status` and
-`final_confidence` in frontmatter with the Final verdict values. For
+Before writing the durable page, replace `final_answer_status`,
+`final_confidence`, and `final_lifecycle` in frontmatter with the Final verdict
+values. Use this exact lifecycle mapping:
+
+- `reviewed` -> `lifecycle: reviewed`
+- `review_pending` -> `lifecycle: draft`
+- `pipeline_blocked` -> `lifecycle: quarantined`
+
+For
 `reviewed`, confidence is the Round 3 per-question average divided by 100; for
 `review_pending` or `pipeline_blocked`, use numeric `0.0` and keep any
 completed Round 3 average as a separate diagnostic only.
@@ -62,6 +69,8 @@ Fill this section only when `answer_status` is `pipeline_blocked`:
 
 In blocked mode, retain only real completed question/round sections and omit
 all unstarted sections below. Never publish placeholder answers or scores.
+For `reviewed` or `review_pending`, remove this entire
+`## Pipeline block record` section before writing the durable page.
 
 ## Frozen questions
 
