@@ -29,8 +29,9 @@ def require_tool(name: str) -> str:
     path = shutil.which(name)
     if not path:
         fail(
-            f"required tool '{name}' was not found in PATH; install Poppler "
-            "(macOS: brew install poppler; Debian/Ubuntu: apt install poppler-utils)"
+            f"required tool '{name}' was not found in PATH; run "
+            "scripts/check_dependencies.py for platform-specific Poppler setup "
+            "guidance, then retry"
         )
     return path
 

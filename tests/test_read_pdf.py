@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 import hashlib
 import json
-import os
 from pathlib import Path
-import stat
 import subprocess
 import sys
 import tempfile
 import unittest
 
+from fake_poppler import make_python_tool, tool_environment
+
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
 SCRIPT = SKILL_DIR / "scripts" / "read_pdf.py"
-
-
-def make_executable(path: Path, body: str) -> None:
-    path.write_text(body)
-    path.chmod(path.stat().st_mode | stat.S_IXUSR)
 
 
 class ReadPdfCliTest(unittest.TestCase):
@@ -28,39 +23,35 @@ class ReadPdfCliTest(unittest.TestCase):
         self.pdf = self.root / "paper with spaces.pdf"
         self.pdf.write_bytes(b"%PDF-1.4\nfixture\n")
 
-        make_executable(
-            self.bin / "pdfinfo",
-            "#!/bin/sh\n"
-            "cat <<'EOF'\n"
-            "Title:          Fixture Paper\n"
-            "Author:         Test Author\n"
-            "Pages:          3\n"
-            "PDF version:    1.4\n"
-            "EOF\n",
+        make_python_tool(
+            self.bin,
+            "pdfinfo",
+            "print('Title:          Fixture Paper')\n"
+            "print('Author:         Test Author')\n"
+            "print('Pages:          3')\n"
+            "print('PDF version:    1.4')\n",
         )
-        make_executable(
-            self.bin / "pdftotext",
-            "#!/bin/sh\n"
-            "page=1\n"
-            "while [ $# -gt 0 ]; do\n"
-            "  if [ \"$1\" = \"-f\" ]; then page=$2; shift 2; continue; fi\n"
-            "  shift\n"
-            "done\n"
-            "case \"$page\" in\n"
-            "  1) printf 'Fixture Paper\\nAbstract body\\n' ;;\n"
-            "  2) printf 'II.   METHODS                              side-column text\\nMethod body\\n' ;;\n"
-            "  3) printf 'left-column text                           III.   RESULTS AND DISCUSSION\\nResult body\\nIV. CONCLUSION\\n' ;;\n"
-            "esac\n",
+        make_python_tool(
+            self.bin,
+            "pdftotext",
+            "import sys\n"
+            "args = sys.argv[1:]\n"
+            "page = args[args.index('-f') + 1] if '-f' in args else '1'\n"
+            "pages = {\n"
+            "  '1': 'Fixture Paper\\nAbstract body\\n',\n"
+            "  '2': 'II.   METHODS                              side-column text\\nMethod body\\n',\n"
+            "  '3': 'left-column text                           III.   RESULTS AND DISCUSSION\\nResult body\\nIV. CONCLUSION\\n',\n"
+            "}\n"
+            "sys.stdout.write(pages[page])\n",
         )
-        make_executable(
-            self.bin / "pdftoppm",
-            "#!/bin/sh\n"
-            "last=''\n"
-            "for arg in \"$@\"; do last=$arg; done\n"
-            "printf 'png' > \"${last}.png\"\n",
+        make_python_tool(
+            self.bin,
+            "pdftoppm",
+            "from pathlib import Path\n"
+            "import sys\n"
+            "Path(sys.argv[-1] + '.png').write_bytes(b'png')\n",
         )
-        self.env = os.environ.copy()
-        self.env["PATH"] = str(self.bin) + os.pathsep + self.env.get("PATH", "")
+        self.env = tool_environment(self.bin)
 
     def tearDown(self) -> None:
         self.tmp.cleanup()

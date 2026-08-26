@@ -327,6 +327,18 @@ becomes `reviewed`, update this registry and `relations.md` in the same change.
 Use the bundled `scripts/read_pdf.py` for repeatable PDF intake and page-bounded
 evidence extraction. Resolve the script path relative to this `SKILL.md`.
 
+Before the first PDF operation on a machine, run the runtime doctor:
+
+```bash
+python3 scripts/check_dependencies.py
+```
+
+Only report the PDF reader as ready when the doctor returns exit code `0` and
+`"ready": true`. Unit tests use isolated fake Poppler commands and do not prove
+that the real machine has `pdfinfo`, `pdftotext`, or `pdftoppm`. If the doctor
+returns `ready: false`, report `skill installed; PDF runtime blocked`, preserve
+the exact missing-command list, and ask before installing a system package.
+
 ```bash
 python3 scripts/read_pdf.py paper.pdf \
   --output-dir /private/tmp/paper-read \
@@ -337,6 +349,12 @@ Run `python3 scripts/read_pdf.py --help` for page-selection and DPI options. The
 tool requires Poppler commands `pdfinfo`, `pdftotext`, and `pdftoppm` when pages
 are rendered. It is read-only with respect to the source PDF and rejects derived
 output under `.wiki/raw`.
+
+Common Poppler setup paths are `brew install poppler` on macOS,
+`apt-get install poppler-utils` on Debian/Ubuntu, and a maintained Windows
+Poppler build whose binary directory (containing `pdfinfo.exe`,
+`pdftotext.exe`, and `pdftoppm.exe`) is added to `PATH`. Use the doctor's
+platform-specific hints; do not assume a package manager is available.
 
 The output contract is:
 
