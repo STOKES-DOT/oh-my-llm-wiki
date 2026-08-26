@@ -10,7 +10,8 @@ evaluation artifact, not evidence of the user's research interests.
 Run the pipeline after the source PDF has been registered and read in full,
 but before the Main Agent promotes the new source page or finishes index and
 log updates. Required inputs are the immutable PDF, its SHA-256, the PDF page
-count, a section/page index, the Organizer's full-paper notes, and the current
+count, a section/page index, the Main Agent's full-paper reading notes, and
+the current
 wiki index. If direct paper reading is incomplete, stop with
 `answer_status: pipeline_blocked`; do not substitute an abstract or an
 existing summary.
@@ -33,7 +34,8 @@ The Main Agent is the sole orchestrator and sole wiki writer. It MUST:
    staging run directory as it occurs. Publish the durable query page and
    accepted final manifest only after validation.
 6. Continue the source ingest when the query pipeline is blocked, while
-   recording the block in the source page, query registry/index, and log.
+   recording the block in the source page, durable Agent Queries page,
+   `.wiki/wiki/index.md`, and `.wiki/wiki/log.md`.
 7. Reconcile the final answers and evaluator corrections with the Organizer's
    source-page draft before promotion. If they conflict, retain the supported
    version and keep the affected source claim draft, ambiguous, or pending
@@ -49,8 +51,9 @@ appear in the next full Organizer rewrite or in the final unresolved checks.
 
 The Organizer receives the Evidence Pack and produces the source-page draft.
 For each Questioner prompt it writes a complete answer in both required lanes.
-In Rounds 2 and 3 it MUST replace the prior answer with a complete standalone
-rewrite that addresses the evaluator feedback; a patch, diff, or abbreviated
+In Rounds 2 and 3 it MUST emit a new complete standalone answer version that
+addresses the evaluator feedback and preserve every earlier version unchanged;
+a patch, diff, or abbreviated
 "unchanged" response is invalid. The Organizer cites exact PDF pages for
 paper claims and exact maintained wiki pages for knowledge-base claims. It
 must state when either evidence layer is insufficient.
@@ -82,8 +85,8 @@ The Main Agent freezes an Evidence Pack with:
 - paper identity, version, source path, SHA-256, PDF page count, and extraction
   tool/version;
 - full-paper section/page map and page-marked text or rendered page references;
-- Organizer notes for research question, method, data, results, assumptions,
-  limitations, and unresolved transcription checks;
+- the Main Agent's full-paper reading notes for research question, method,
+  data, results, assumptions, limitations, and unresolved transcription checks;
 - the wiki index and only the maintained source, concept, topic, relation, and
   prior query pages selected for this run, each with its lifecycle and links;
 - the evidence-pack hash or manifest identifier shared by every role.
@@ -92,8 +95,10 @@ For each role invocation, hash the complete input: role contract, Evidence
 Pack identifier, frozen question set, current full answers, and all applicable
 prior feedback. Assign a run-unique attempt ID. A retry must reuse the same
 complete input hash. If any input must change, terminate the current run and
-start a separately identified run; changing input never resets or extends the
-two-attempt limit inside a run.
+start a separately identified run. Finalize the abandoned run with
+`answer_status: pipeline_blocked`, `terminal_reason: input_changed`, and
+`superseded_by: <new-run-id>` in a non-reviewed terminal manifest. Changing
+input never resets or extends the two-attempt limit inside a run.
 
 A role may not browse beyond this pack during scoring. External verification,
 if needed, is a separate Main Agent action and creates a new pack/run rather
@@ -145,15 +150,17 @@ Both answer and feedback are appended to history unchanged.
 
 ## Round 2
 
-The Organizer uses the Round 1 feedback to write a complete replacement answer
+The Organizer uses the Round 1 feedback to emit a new complete standalone
+answer version
 for every question, including answers that already passed. The Evaluator
 rescans citations and returns a new complete score and complete feedback. Do
 not store only changes from Round 1.
 
 ## Round 3
 
-The Organizer uses all prior feedback to write the final complete replacement
-answer for every question. The Evaluator performs the final independent score
+The Organizer uses all prior feedback to emit the final complete standalone
+answer version for every question while preserving Rounds 1 and 2 unchanged.
+The Evaluator performs the final independent score
 and returns complete feedback. The Main Agent records the final verdict after
 this evaluation. There is no Round 4 and no hidden repair after scoring.
 
@@ -244,6 +251,10 @@ every complete evaluator response, scores, retry events, and final verdict.
 The durable page links the source
 page and original PDF and is marked `AGENT-GENERATED`. Only the Main Agent may
 write either layer or update source pages, relations, topics, index, or log.
+No Agent Queries question, answer, score, feedback, or inferred relation may
+create an interest signal or change any `wiki/topics/users/**` lifecycle.
+Existing confirmed user topics may receive only ordinary source-grounded
+ingest updates under the user-topic rules.
 
 The final manifest is the commit marker and MUST be published last. It records
 the content hash of the durable query page and every reconciled source, topic,

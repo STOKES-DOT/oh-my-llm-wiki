@@ -75,6 +75,10 @@ class AgentQueriesContractTest(unittest.TestCase):
             "complete-input hash",
             "Render frontmatter through a YAML serializer",
             "For a blocked run",
+            "Main Agent's full-paper reading notes",
+            "terminal_reason: input_changed",
+            "superseded_by: <new-run-id>",
+            "No Agent Queries question, answer, score, feedback, or inferred relation",
         ):
             self.assertIn(fragment, normalized)
 
@@ -163,6 +167,22 @@ class AgentQueriesContractTest(unittest.TestCase):
         text = SKILL.read_text(encoding="utf-8")
         self.assertIn("## Agent Queries module", text)
         self.assertIn("references/agent-queries-pipeline.md", text)
+        normalized = re.sub(r"\s+", " ", text)
+        for fragment in (
+            "every new-paper ingest",
+            "sole orchestrator and sole wiki writer",
+            "three read-only roles",
+            "3-5 frozen, paper-specific questions",
+            "exactly three answer-score rounds",
+            "Paper-grounded answer",
+            "Knowledge-base-augmented answer",
+            "Use `reviewed` only when every question passes every Round 3 gate",
+            "Use `review_pending` only after all three rounds complete",
+            "Use `pipeline_blocked` when prerequisites are unmet",
+            ".wiki/wiki/queries/<paper-title>-agent-queries.md",
+            "No generated question, answer, score, feedback, or",
+        ):
+            self.assertIn(fragment, normalized)
 
     def test_readme_documents_agent_queries_entry_points(self) -> None:
         text = README.read_text(encoding="utf-8")
