@@ -1,12 +1,14 @@
 # oh-my-llm-wiki
 
+<p align="center">
+  <img src="examples/oh-my-llm-wiki-hero-elves-slime-table-graph-v5-schrodinger.png" alt="Three elf research agents and a slime master turning scientific papers into a living knowledge graph" width="100%">
+</p>
+
 A local-first agent skill for turning paper reading and research conversations
 into an evidence-bounded Markdown wiki.
 
 The repository contains the reusable skill only. It does not publish the local
 wiki corpus or original papers.
-
-![Obsidian knowledge graph showing a selected method topic and its connected literature](examples/knowledge-graph.png)
 
 ## What it maintains
 
@@ -180,6 +182,16 @@ wiki/topics/users/<user-key>/index.md   one user's topic index
 wiki/topics/users/<user-key>/<slug>.md  one user's interest topic
 ```
 
+## Obsidian graph example
+
+The maintained source, concept, topic, and query pages use explicit wikilinks
+and reciprocal backlinks. The resulting local graph stays navigable both in
+Markdown and in Obsidian Graph View.
+
+<p align="center">
+  <img src="examples/knowledge-graph.png" alt="Obsidian knowledge graph showing a selected method topic and its connected literature" width="82%">
+</p>
+
 ## Repository layout
 
 ```text
@@ -193,6 +205,7 @@ tests/fake_poppler.py
 tests/test_agent_queries_contract.py
 tests/test_check_dependencies.py
 tests/test_read_pdf.py
+examples/oh-my-llm-wiki-hero-elves-slime-table-graph-v5-schrodinger.png
 examples/knowledge-graph.png
 ```
 
