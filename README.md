@@ -88,6 +88,10 @@ records, plus only the question, answer, feedback, and score artifacts that
 actually completed. Every available evaluator score and feedback record is
 retained.
 
+The durable Agent Queries page also links to its source, existing concepts,
+shared topics, related papers, and related queries; reciprocal backlinks make
+those relations visible and navigable in Obsidian Graph View.
+
 A query becomes `reviewed` only when every question passes the final 100-point
 gates. A completed three-round run with a failed gate is `review_pending`; an
 unmet prerequisite or exhausted retry is `pipeline_blocked` while source

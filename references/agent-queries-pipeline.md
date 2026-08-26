@@ -223,6 +223,23 @@ Map state to page lifecycle exactly: `reviewed` uses `lifecycle: reviewed`,
 `review_pending` uses `lifecycle: draft`, and `pipeline_blocked` uses
 `lifecycle: quarantined`.
 
+## Knowledge graph links
+
+Every durable Agent Queries page MUST use Obsidian `[[wikilinks]]` to connect
+to its source page and to relevant existing concepts, shared topics, related
+papers, and related query pages. Include only nodes used by the paper-grounded
+or knowledge-base-augmented answers.
+
+The Main Agent is the sole writer. For each accepted link it updates
+`## Agent Queries backlinks` on the linked maintained page. Supported
+cross-paper or cross-method edges are also recorded in `wiki/relations.md`
+with their evidence and status.
+
+Do not create a target page only to make the graph denser. If identity or
+evidence is unresolved, record `none-found` or an unresolved check instead of
+a dangling wikilink. Agent Queries must not create or activate a personal
+topic, and it must not change `.wiki/wiki/topics/users/**` lifecycle.
+
 ## Storage and write isolation
 
 The Main Agent writes the durable, human-readable record to:
