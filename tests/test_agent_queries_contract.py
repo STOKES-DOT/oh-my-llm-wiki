@@ -79,6 +79,8 @@ class AgentQueriesContractTest(unittest.TestCase):
             "terminal_reason: input_changed",
             "superseded_by: <new-run-id>",
             "No Agent Queries question, answer, score, feedback, or inferred relation",
+            "relative to the host workspace root",
+            "create no role attempt records",
         ):
             self.assertIn(fragment, normalized)
 
@@ -186,23 +188,36 @@ class AgentQueriesContractTest(unittest.TestCase):
 
     def test_readme_documents_agent_queries_entry_points(self) -> None:
         text = README.read_text(encoding="utf-8")
-        fragments = (
-            "PDF reader + existing wiki",
-            "Evidence Pack",
-            "Organizer: source draft",
-            "Questioner: 3-5 questions",
-            "Round 1 Organizer answers",
-            "Round 2 Organizer revises",
-            "Round 3 Organizer revises",
-            "Evaluator final score",
-            "Main Agent validates and writes",
-        )
-        positions = []
-        for fragment in fragments:
-            position = text.find(fragment)
-            self.assertGreaterEqual(position, 0, f"missing README flow fragment: {fragment}")
-            positions.append(position)
-        self.assertEqual(positions, sorted(positions))
+        expected_flow = """PDF reader + existing wiki
+        |
+        v
+Evidence Pack
+        |
+        +--> Organizer: source draft
+        |
+        +--> Questioner: 3-5 questions
+                         |
+                         v
+Round 1: Organizer answers
+         -> Evaluator scores/feedback
+Round 2: Organizer revises
+         -> Evaluator scores/feedback
+Round 3: Organizer revises
+         -> Evaluator final score
+                         |
+                         v
+Main Agent validates and writes:
+source page + agent-queries page + relations/topic/index/log"""
+        self.assertIn(expected_flow, text)
+        normalized = re.sub(r"\s+", " ", text)
+        for entry_point in (
+            "references/agent-queries-pipeline.md",
+            "templates/agent-queries.md",
+            ".wiki/wiki/queries/<paper-title>-agent-queries.md",
+            ".wiki/output/agent-query-runs/<paper-sha256>/<run-date>/",
+            "Here `<run-date>` is the unique run identifier",
+        ):
+            self.assertIn(entry_point, normalized)
 
 
 if __name__ == "__main__":

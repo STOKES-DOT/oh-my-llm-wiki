@@ -226,7 +226,7 @@ The Main Agent writes the durable, human-readable record to:
 
 `wiki/queries/<paper-title>-agent-queries.md`
 
-This path is relative to `.wiki/`, so its repository-relative form is
+This path is relative to `.wiki/`, so its host-workspace-relative form is
 `.wiki/wiki/queries/<paper-title>-agent-queries.md`. `<paper-title>` is a
 path-safe title slug; if two source identities collide, append a short paper
 SHA-256 suffix rather than overwriting either page.
@@ -235,7 +235,7 @@ The Main Agent writes the complete machine history to:
 
 `.wiki/output/agent-query-runs/<paper-sha256>/<run-date>/`
 
-This path is repository-relative. The approved directory placeholder
+This path is relative to the host workspace root. The approved directory placeholder
 `<run-date>` maps exactly to the template field `run_id`; it is not the
 display-only run date. Its value MUST be a unique run identifier of the form
 `YYYY-MM-DDTHHMMSSZ-<evidence-pack-hash-prefix>`; a same-second
@@ -285,8 +285,9 @@ failed stage, role, both attempt IDs, errors, and next check. Set frontmatter
 `confidence` to numeric `0.0`, use a non-reviewed lifecycle, and record final
 average as `not_applicable`.
 For a prerequisite failure before any role invocation, record the prerequisite
-evidence and use `not_applicable` for both attempt records. Require two attempt
-records only when a role or validation invocation was actually retried.
+evidence, create no role attempt records, and render any required attempt
+fields as `not_applicable`. Require two attempt records only when a role or
+validation invocation was actually retried.
 
 Malformed scores, fewer than 3 or more than 5 questions, mutated question text
 between rounds, missing full answers/feedback, out-of-range citations, or a
