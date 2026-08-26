@@ -205,6 +205,30 @@ class AgentQueriesContractTest(unittest.TestCase):
         ):
             self.assertIn(fragment, normalized)
 
+    def test_agent_queries_define_minimal_obsidian_network(self) -> None:
+        skill = SKILL.read_text(encoding="utf-8")
+        reference = REFERENCE.read_text(encoding="utf-8")
+        template = TEMPLATE.read_text(encoding="utf-8")
+
+        for fragment in (
+            "## Knowledge graph links",
+            "Source page",
+            "Concepts",
+            "Shared topics",
+            "Related papers",
+            "Related queries",
+        ):
+            self.assertIn(fragment, template)
+
+        for text in (skill, reference):
+            normalized = re.sub(r"\s+", " ", text)
+            for fragment in (
+                "## Agent Queries backlinks",
+                "relations.md",
+                "must not create or activate a personal topic",
+            ):
+                self.assertIn(fragment, normalized)
+
     def test_readme_documents_agent_queries_entry_points(self) -> None:
         text = README.read_text(encoding="utf-8")
         expected_flow = """PDF reader + existing wiki

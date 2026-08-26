@@ -72,6 +72,19 @@ all unstarted sections below. Never publish placeholder answers or scores.
 For `reviewed` or `review_pending`, remove this entire
 `## Pipeline block record` section before writing the durable page.
 
+## Knowledge graph links
+
+- Source page: [[{{source_page}}]]
+- Concepts: {{existing_concept_wikilinks_or_none}}
+- Shared topics: {{existing_shared_topic_wikilinks_or_none}}
+- Related papers: {{existing_paper_wikilinks_or_none}}
+- Related queries: {{existing_query_wikilinks_or_none}}
+
+For every resolved wikilink above, the Main Agent updates
+`## Agent Queries backlinks` on the target page. Record supported cross-paper
+or cross-method edges in `wiki/relations.md`. Use `none-found` or an unresolved
+check instead of creating a dangling link or a personal topic.
+
 ## Frozen questions
 
 ### Q1

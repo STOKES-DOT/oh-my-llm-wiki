@@ -151,6 +151,18 @@ inferred relation may create an interest signal or change
 `.wiki/wiki/topics/users/**`; existing confirmed topics receive only ordinary
 source-grounded ingest updates under the user-topic rules.
 
+### Knowledge graph links
+
+Make each durable Agent Queries page part of the Obsidian graph. Add
+evidence-backed `[[wikilinks]]` to its source page, relevant existing concepts,
+shared topics, related papers, and related query pages. The Main Agent updates
+`## Agent Queries backlinks` on each linked maintained page and mirrors
+supported cross-paper or cross-method edges in `wiki/relations.md`.
+
+Do not create a page only to make the graph denser. An unsupported connection
+is `none-found` or an unresolved check, not a dangling link. Agent Queries
+must not create or activate a personal topic.
+
 ## User-aware topic lifecycle
 
 **Core principle: share evidence, personalize attention.** Paper identity,
