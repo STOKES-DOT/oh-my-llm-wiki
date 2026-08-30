@@ -185,3 +185,48 @@ Round 3 answer, final gate verdict, and actual average as diagnostic metadata.
 
 GREEN. All three scenarios satisfy the current contract after the Scenario B
 failure-classification correction.
+
+## Scenario D: complete paper with scoped role views
+
+Validation date: 2026-08-30
+Agent: `01a051c9-2aa8-7ed1-8a58-a79392f4a361`
+
+A 15-page method paper uses a manifest with `pdf_page_count: 15`, one ledger
+record for each page 1-15, reviewed visual pages 6 and 11, matching Evidence
+Cards, and six resolved coverage dimensions. The validator returns `valid:true`.
+
+The initial prompt intentionally omitted whether the visual checks and exact
+ledger validation had completed; the agent correctly failed closed. After those
+facts were made explicit, the regression passed: Source Page promotion was
+allowed by the completeness gate, default question count was three, subagents
+received scoped Evidence Card views rather than the raw PDF or inherited
+conversation, and all three complete rounds remained preserved.
+
+Result: PASS after explicit completeness evidence.
+
+## Scenario E: query scores cannot hide a missing PDF page
+
+Validation date: 2026-08-30
+Agent: `01a051c9-2b37-7422-8259-50d49e9093b5`
+
+A 15-page paper omitted PDF page 9 from `page-ledger.jsonl` while all three
+Round 3 answers scored 100/100. The agent calculated page coverage as 14/15,
+required validator exit code 1 with `missing PDF pages: 9`, blocked Source Page
+promotion, and required processing page 9 followed by revalidation. It did not
+infer the missing page from adjacent evidence or allow query scores to override
+the completeness gate.
+
+Result: PASS.
+
+## Scenario F: ordinary retrieval excludes machine history
+
+Validation date: 2026-08-30
+Agent: `01a051c9-2bb1-7603-9562-8a96a7c5cd64`
+
+Ordinary paper/method retrieval loaded index, source, concept/topic, and the
+lightweight final Agent Queries page without reading `.wiki/output`. An explicit
+request to audit Q2 across rounds loaded the six exact round answer and evaluator
+feedback files. Complete history remained preserved and available without being
+part of normal retrieval context.
+
+Result: PASS.

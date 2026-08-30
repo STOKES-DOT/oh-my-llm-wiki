@@ -24,7 +24,8 @@ must not edit `.wiki/`, the source PDF, or another role's artifact.
 
 The Main Agent is the sole orchestrator and sole wiki writer. It MUST:
 
-1. Build one immutable Evidence Pack and send the same version to all roles.
+1. Build one immutable Evidence Pack and send role-scoped views carrying the
+   same manifest ID; never send the raw full PDF to every role.
 2. Enforce the role boundaries, 3-5 question count, exactly three rounds, and
    per-question scoring gates.
 3. Reject citations outside the Evidence Pack and independently validate page
@@ -60,7 +61,7 @@ must state when either evidence layer is insufficient.
 
 ## Questioner
 
-The Questioner reads the Evidence Pack, but not draft answers or evaluator
+The Questioner reads a scoped Evidence Card view, but not draft answers or evaluator
 scores. It generates 3-5 non-duplicative, paper-specific questions spanning
 method mechanism, evidence/results, assumptions or limitations, and at least
 one useful cross-paper or method comparison when the Evidence Pack permits.
@@ -70,8 +71,8 @@ that require unprovided external sources.
 
 ## Evaluator
 
-The Evaluator receives the frozen Evidence Pack, all questions, the current
-round's complete answers, and prior feedback. It independently checks every
+The Evaluator receives the question-scoped view, all frozen questions, the current
+round's complete answers, and necessary unresolved feedback. It independently checks every
 citation and scores every question against the six-dimension rubric. It
 returns the complete numerical breakdown, `critical_failure`, pass/fail, and
 specific correction instructions. The Evaluator does not rewrite answers and
@@ -103,6 +104,51 @@ input never resets or extends the two-attempt limit inside a run.
 A role may not browse beyond this pack during scoring. External verification,
 if needed, is a separate Main Agent action and creates a new pack/run rather
 than mutating evidence in place.
+
+## Full-paper completeness and scoped context
+
+The Main Agent reads every page once from the page-marked extraction in batches
+of 4-8 PDF pages. After each batch, persist compact evidence and discard the raw
+batch from subsequent role contexts. The Evidence Pack contains:
+
+- `manifest.json`: source SHA-256, PDF page count, schema, and run identity;
+- `page-ledger.jsonl`: one record for every PDF page from 1 through N;
+- `evidence-cards.jsonl`: page-bounded method, data, result, limitation,
+  quantitative, relation, and reproducibility evidence;
+- `coverage.json`: research question, method, data, results, limitations, and
+  relations status plus the Evidence Card IDs supporting every `covered`
+  dimension;
+- `views/QN.json`: only the cards and maintained pages needed by one question.
+
+Ledger page types `figure`, `table`, `equation`, `key-numerical`,
+`identity-ambiguous`, and `extraction-failure` require
+`visual_status: reviewed` and a `rendered_path` resolving to an existing file
+inside the Evidence Pack. They cannot use `not_required`.
+
+Run `python3 scripts/validate_evidence_pack.py <evidence-pack>` before Source
+Page promotion. The Source Page is complete only when page coverage is N/N,
+all required visual checks are resolved, all card references exist, and every
+coverage dimension is `covered`, `none-found`, or `not-applicable`.
+
+The Questioner creates exactly three questions by default: mechanism/results,
+reproducibility/limitations, and knowledge-base comparison/boundary. Q4-Q5
+require a distinct research object or explicit user request recorded in the
+manifest.
+
+Each invocation must not inherit the whole conversation. Pass only the role
+contract, Evidence Pack ID, frozen question, current complete answer, necessary
+unresolved feedback, and selected card/page links. Evaluator reads cited
+Evidence Cards and disputed Evidence Cards. Missing evidence triggers a Main
+Agent view expansion; it never authorizes model-memory substitution.
+Question views contain shared source, concept, topic, relation, and query pages
+only and must exclude `.wiki/wiki/topics/users/**`. Agent-generated artifacts
+cannot create, activate, or modify personal topics.
+
+Target 600-1000 Chinese characters per question per round. This is a compression
+target, not a truncation rule; quantitative tables, evidence conflicts,
+multi-method comparisons, and explicit user requests may exceed it. Passing
+feedback may be concise only when it still contains all six scores, citation
+verdict, gate verdict, and conclusion.
 
 ## Question schema
 
@@ -154,7 +200,8 @@ The Organizer uses the Round 1 feedback to emit a new complete standalone
 answer version
 for every question, including answers that already passed. The Evaluator
 rescans citations and returns a new complete score and complete feedback. Do
-not store only changes from Round 1.
+not store only changes from Round 1. Round 2 receives the current answer and
+unresolved Round 1 feedback, not the inherited full conversation.
 
 ## Round 3
 
@@ -162,7 +209,8 @@ The Organizer uses all prior feedback to emit the final complete standalone
 answer version for every question while preserving Rounds 1 and 2 unchanged.
 The Evaluator performs the final independent score
 and returns complete feedback. The Main Agent records the final verdict after
-this evaluation. There is no Round 4 and no hidden repair after scoring.
+this evaluation. Round 3 receives the current answer and unresolved feedback,
+not all prior chat text. There is no Round 4 and no hidden repair after scoring.
 
 ## Scoring and verdict
 
@@ -254,6 +302,17 @@ SHA-256 suffix rather than overwriting either page.
 The Main Agent writes the complete machine history to:
 
 `.wiki/output/agent-query-runs/<paper-sha256>/<run-date>/`
+
+The durable page contains frozen questions, Round 3 final answers, score
+trajectory, final verdict, graph links, and links to complete round artifacts.
+Complete standalone answers and complete evaluator feedback remain in
+`round-1/`, `round-2/`, and `round-3/` below the machine-history directory.
+Ordinary Wiki retrieval must not load `.wiki/output`; only audit, recheck, or
+explicit round-history requests may load it.
+Use `retrieval_mode: ordinary | audit | recheck | round-history`. Ordinary mode
+may read index, source, concept, shared topic, relation, and the lightweight
+query page; it returns output paths without expanding them. Non-ordinary modes
+record the mode, loaded file list, and reason in the operation log.
 
 This path is relative to the host workspace root. The approved directory placeholder
 `<run-date>` maps exactly to the template field `run_id`; it is not the

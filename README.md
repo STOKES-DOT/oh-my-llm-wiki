@@ -18,7 +18,7 @@ wiki corpus or original papers.
 - General method-family topics, method-improvement tables, and cross-paper
   relations.
 - Human-focus queries that preserve what the user actually asked.
-- Agent Queries with 3-5 paper-specific questions, an initial scored answer
+- Agent Queries with three paper-specific questions by default, an initial scored answer
   round, two scored rewrite rounds, and complete answer/feedback history.
 - User-aware topic lifecycles without mixing one person's interests into
   another person's topic graph.
@@ -82,7 +82,7 @@ The skill routes durable knowledge into:
 
 Every new-paper ingest runs a paper-understanding and maintained-wiki
 extrapolation audit. The Main Agent is the sole writer; Organizer, Questioner,
-and Evaluator are read-only roles. The Questioner creates 3-5 frozen questions,
+and Evaluator are read-only roles. The Questioner creates exactly three questions by default,
 and the Organizer answers each question in separate paper-grounded and
 knowledge-base-augmented lanes. Non-blocked runs execute exactly three
 complete answer-score rounds; blocked runs preserve all attempt and failure
@@ -99,6 +99,12 @@ gates. A completed three-round run with a failed gate is `review_pending`; an
 unmet prerequisite or exhausted retry is `pipeline_blocked` while source
 ingest continues.
 
+The Main Agent reads every PDF page once in batches of 4-8 PDF pages and
+persists `page-ledger.jsonl`, `evidence-cards.jsonl`, and `coverage.json`.
+Subagents receive scoped Evidence Card views instead of repeatedly loading the
+full PDF or inherited conversation. The maintained query page keeps final
+answers and score trajectory; full round history is loaded only for audit.
+
 ```text
 PDF reader + existing wiki
         |
@@ -107,7 +113,7 @@ Evidence Pack
         |
         +--> Organizer: source draft
         |
-        +--> Questioner: 3-5 questions
+        +--> Questioner: 3 questions by default
                          |
                          v
 Round 1: Organizer answers
@@ -197,14 +203,17 @@ Markdown and in Obsidian Graph View.
 ```text
 SKILL.md
 references/agent-queries-pipeline.md
+templates/agent-query-round.md
 templates/agent-queries.md
 tests/agent_queries_scenarios.md
 scripts/check_dependencies.py
 scripts/read_pdf.py
+scripts/validate_evidence_pack.py
 tests/fake_poppler.py
 tests/test_agent_queries_contract.py
 tests/test_check_dependencies.py
 tests/test_read_pdf.py
+tests/test_validate_evidence_pack.py
 examples/oh-my-llm-wiki-hero-elves-slime-table-graph-v5-schrodinger.png
 examples/knowledge-graph.png
 ```
