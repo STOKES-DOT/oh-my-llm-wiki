@@ -8,6 +8,7 @@ import unittest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = REPO_ROOT / "references" / "agent-queries-pipeline.md"
 TEMPLATE = REPO_ROOT / "templates" / "agent-queries.md"
+RUN_TEMPLATE = REPO_ROOT / "templates" / "agent-query-round.md"
 SKILL = REPO_ROOT / "SKILL.md"
 README = REPO_ROOT / "README.md"
 
@@ -86,8 +87,9 @@ class AgentQueriesContractTest(unittest.TestCase):
         ):
             self.assertIn(fragment, normalized)
 
-    def test_agent_queries_template_contains_three_round_answer_feedback_contract(self) -> None:
-        text = TEMPLATE.read_text(encoding="utf-8")
+    def test_machine_run_template_contains_three_round_answer_feedback_contract(self) -> None:
+        self.assertTrue(RUN_TEMPLATE.exists(), "missing complete machine-run template")
+        text = RUN_TEMPLATE.read_text(encoding="utf-8")
         self.assertNotRegex(text, r"(?m)^## Round 4$")
 
         frontmatter = text.split("---", 2)[1]
@@ -183,6 +185,54 @@ class AgentQueriesContractTest(unittest.TestCase):
         ):
             self.assertIn(required_fragment, text)
 
+    def test_durable_query_template_is_lightweight(self) -> None:
+        text = TEMPLATE.read_text(encoding="utf-8")
+        for heading in (
+            "## Frozen questions",
+            "## Final answers",
+            "## Score trajectory",
+            "## Full history",
+            "## Knowledge graph links",
+            "## Final verdict",
+        ):
+            self.assertIn(heading, text)
+        self.assertNotRegex(text, r"(?m)^## Round [123]$")
+        for fragment in (
+            "round-1/answers.md",
+            "round-1/evaluator-feedback.md",
+            "round-2/answers.md",
+            "round-2/evaluator-feedback.md",
+            "round-3/answers.md",
+            "round-3/evaluator-feedback.md",
+        ):
+            self.assertIn(fragment, text)
+
+    def test_token_efficient_full_paper_contract(self) -> None:
+        combined = "\n".join(
+            (
+                SKILL.read_text(encoding="utf-8"),
+                REFERENCE.read_text(encoding="utf-8"),
+                README.read_text(encoding="utf-8"),
+            )
+        )
+        normalized = re.sub(r"\s+", " ", combined)
+        for fragment in (
+            "page-ledger.jsonl",
+            "evidence-cards.jsonl",
+            "coverage.json",
+            "4-8 PDF pages",
+            "exactly three questions by default",
+            "must not inherit the whole conversation",
+            "cited Evidence Cards and disputed Evidence Cards",
+            "600-1000 Chinese characters",
+            "Ordinary Wiki retrieval must not load `.wiki/output`",
+            "scripts/validate_evidence_pack.py",
+            "retrieval_mode: ordinary | audit | recheck | round-history",
+            "must exclude `.wiki/wiki/topics/users/**`",
+            "rendered_path",
+        ):
+            self.assertIn(fragment, normalized)
+
     def test_skill_exposes_agent_queries_module_and_reference(self) -> None:
         text = SKILL.read_text(encoding="utf-8")
         self.assertIn("## Agent Queries module", text)
@@ -192,7 +242,7 @@ class AgentQueriesContractTest(unittest.TestCase):
             "every new-paper ingest",
             "sole orchestrator and sole wiki writer",
             "three read-only roles",
-            "3-5 frozen, paper-specific questions",
+            "Questioner** creates exactly three questions by default",
             "exactly three answer-score rounds",
             "Paper-grounded answer",
             "Knowledge-base-augmented answer",
@@ -238,7 +288,7 @@ Evidence Pack
         |
         +--> Organizer: source draft
         |
-        +--> Questioner: 3-5 questions
+        +--> Questioner: 3 questions by default
                          |
                          v
 Round 1: Organizer answers

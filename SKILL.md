@@ -125,7 +125,8 @@ The Main Agent is the sole orchestrator and sole wiki writer. It delegates to
 three read-only roles:
 
 - **Organizer** drafts the source synthesis and writes complete answers.
-- **Questioner** creates 3-5 frozen, paper-specific questions.
+- **Questioner** creates exactly three questions by default; Q4-Q5 require a
+  distinct research object or explicit user request.
 - **Evaluator** verifies citations, assigns the 100-point rubric, and returns
   complete scores and feedback for every question.
 
@@ -150,6 +151,38 @@ artifacts `AGENT-GENERATED`. No generated question, answer, score, feedback, or
 inferred relation may create an interest signal or change
 `.wiki/wiki/topics/users/**`; existing confirmed topics receive only ordinary
 source-grounded ingest updates under the user-topic rules.
+
+### Token-efficient full-paper completeness
+
+Completeness is a separate gate from Agent Queries. The Main Agent reads the
+entire page-marked PDF exactly once in bounded batches of 4-8 PDF pages and
+persists `page-ledger.jsonl`, `evidence-cards.jsonl`, and `coverage.json` under
+the Evidence Pack. Run `scripts/validate_evidence_pack.py` before promoting the
+Source Page. A passing query score never overrides a missing page, pending
+visual check, unknown card, or unresolved coverage dimension.
+
+Organizer, Questioner, and Evaluator receive question-scoped Evidence Card
+views. They must not inherit the whole conversation or reload the raw full PDF.
+Evaluator normally receives cited Evidence Cards and disputed Evidence Cards;
+if evidence is insufficient, it requests a Main Agent view expansion.
+Scoped views contain shared source, concept, topic, relation, and query pages
+only and must exclude `.wiki/wiki/topics/users/**`.
+
+Use exactly three questions by default. Target 600-1000 Chinese characters per
+question per round while preserving a complete standalone answer; quantitative
+tables, evidence conflicts, multi-method comparisons, and user-requested depth
+may exceed the target. Passing feedback may be concise but still records every
+score, citation verdict, and conclusion. Failure feedback remains complete and
+actionable.
+
+The maintained query page stores Round 3 final answers, score trajectory,
+verdict, graph links, and paths to all round artifacts. Complete answers and
+feedback for Rounds 1-3 remain under `.wiki/output`. Ordinary Wiki retrieval
+must not load `.wiki/output`; load it only for audit, recheck, or an explicit
+round-history request.
+Use `retrieval_mode: ordinary | audit | recheck | round-history`; ordinary mode
+returns machine-history paths without expanding them, while non-ordinary modes
+log the mode, loaded files, and reason.
 
 ### Knowledge graph links
 
